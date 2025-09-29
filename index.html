@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Evaluación Empleado vs Socio</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f8fa;
+    margin: 40px auto;
+    max-width: 700px;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+  }
+  .variable {
+    background: white;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin: 15px 0;
+    box-shadow: 0 2px 6px rgba(44, 62, 80, 0.1);
+  }
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+  }
+  input[type=range] {
+    width: 100%;
+  }
+  .valor {
+    font-weight: bold;
+    color: #2980b9;
+    float: right;
+  }
+</style>
+</head>
+<body>
+<h1>Evaluación Empleado vs Socio</h1>
+
+<div id="variables-container"></div>
+
+<script>
+  const variables = {
+    tiempo_invertido: { descripcion: "Horas efectivas dedicadas semanalmente", valor: 3 },
+    ingresos_esperados: { descripcion: "Ingresos netos esperados por semana", valor: 7 },
+    control_decisiones: { descripcion: "Grado de influencia en decisiones", valor: 6 },
+    riesgo_financiero: { descripcion: "Nivel de exposición económica propia", valor: 8 },
+    estabilidad_economica: { descripcion: "Seguridad percibida de ingresos", valor: 4 },
+    flexibilidad_horaria: { descripcion: "Libertad para elegir horarios", valor: 7 },
+    beneficios_adicionales: { descripcion: "Acceso a prestaciones extras", valor: 3 },
+    crecimiento_profesional: { descripcion: "Oportunidades de desarrollo profesional", valor: 7 },
+    compromiso_requerido: { descripcion: "Nivel de esfuerzo y horas necesarias", valor: 4 },
+    eficiencia_economica: { descripcion: "Relación beneficio monetario y tiempo", valor: 6 },
+    poder_negociacion: { descripcion: "Capacidad de influir en salario y beneficios", valor: 6 },
+    participacion_utilidades: { descripcion: "Porcentaje de ganancias recibidas", valor: 8 },
+    riesgo_laboral: { descripcion: "Posibilidad de pérdida de empleo", valor: 3 },
+    costo_oportunidad: { descripcion: "Lo que se deja de ganar o hacer", valor: 2 }
+  };
+
+  const container = document.getElementById('variables-container');
+
+  function createSlider(key, data) {
+    const div = document.createElement('div');
+    div.className = 'variable';
+
+    const label = document.createElement('label');
+    label.htmlFor = key;
+    label.textContent = data.descripcion;
+
+    const valorSpan = document.createElement('span');
+    valorSpan.className = 'valor';
+    valorSpan.textContent = data.valor;
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = 0;
+    slider.max = 10;
+    slider.value = data.valor;
+    slider.id = key;
+
+    slider.oninput = function () {
+      valorSpan.textContent = this.value;
+    };
+
+    div.appendChild(label);
+    div.appendChild(valorSpan);
+    div.appendChild(slider);
+
+    container.appendChild(div);
+  }
+
+  for (const [key, data] of Object.entries(variables)) {
+    createSlider(key, data);
+  }
+</script>
+</body>
+</html>
