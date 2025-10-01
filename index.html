@@ -1,307 +1,242 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Evaluación Empleado vs Socio Dinámica con Dinero</title>
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #eef2f7;
-    margin: 40px auto;
-    max-width: 720px;
-    color: #2c3e50;
-    padding: 0 15px;
-  }
-  h1 {
-    text-align: center;
-    color: #34495e;
-    margin-bottom: 12px;
-  }
-  #dinero-controls {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    padding: 20px 25px;
-    margin-bottom: 30px;
-  }
-  #dinero-controls label {
-    font-weight: 600;
-    font-size: 1rem;
-    user-select: none;
-  }
-  #dinero-controls input[type=checkbox] {
-    margin-right: 10px;
-    transform: scale(1.3);
-    vertical-align: middle;
-  }
-  #dinero-settings {
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    flex-wrap: wrap;
-  }
-  .input-group {
-    display: flex;
-    align-items: center;
-    font-size: 0.95rem;
-  }
-  .input-group label {
-    margin-right: 8px;
-  }
-  .input-group input[type=number] {
-    width: 85px;
-    padding: 6px 8px;
-    border-radius: 6px;
-    border: 1.7px solid #bdc3c7;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-  }
-  .input-group input[type=number]:focus {
-    border-color: #2980b9;
-    outline: none;
-  }
-
-  #variables-container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    padding: 25px 30px;
-  }
-  .variable {
-    margin-bottom: 22px;
-  }
-  .variable:last-child {
-    margin-bottom: 0;
-  }
-  label {
-    font-weight: 600;
-    display: block;
-    margin-bottom: 6px;
-    font-size: 1.05rem;
-    user-select: none;
-  }
-  input[type=range] {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 7px;
-    border-radius: 6px;
-    background: #d5d8dc;
-    outline: none;
-    transition: background 0.3s ease;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #2980b9;
-    cursor: pointer;
-    box-shadow: 0 0 6px rgba(41, 128, 185, 0.7);
-    transition: background 0.3s ease;
-    margin-top: -6.5px;
-  }
-  input[type=range]:disabled::-webkit-slider-thumb {
-    background: #7f8c8d;
-    cursor: default;
-    box-shadow: none;
-  }
-  input[type=range]:hover::-webkit-slider-thumb:not(:disabled) {
-    background: #3498db;
-  }
-  input[type=range]:active::-webkit-slider-thumb:not(:disabled) {
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.9);
-  }
-
-  .valor {
-    font-weight: 700;
-    color: #2980b9;
-    float: right;
-    font-size: 1.05rem;
-    user-select: none;
-  }
-
-  @media (max-width: 520px) {
-    #dinero-settings {
-      flex-direction: column;
-      gap: 12px;
-    }
-    .input-group {
-      width: 100%;
-      justify-content: space-between;
-    }
-    .input-group input[type=number] {
-      flex-grow: 1;
-      max-width: 150px;
-    }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Empleado vs Socio - Sliders Correlativos</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; }
+        .section { margin-bottom: 30px; }
+        .slider-container { margin-bottom: 15px; position: relative; }
+        label { display: block; font-weight: bold; }
+        input[type="range"] { width: 100%; transition: all 0.3s ease; }
+        .output { font-weight: bold; color: #007bff; }
+        .scores { display: flex; justify-content: space-around; }
+        .score-bar { width: 40%; background: #f0f0f0; border: 1px solid #ccc; height: 30px; position: relative; }
+        .bar-fill { height: 100%; background: #4caf50; width: 0; transition: width 0.3s ease; }
+        .bar-text { position: absolute; top: 5px; left: 10px; color: #000; }
+        .conclusion { text-align: center; font-size: 1.2em; margin-top: 20px; }
+        .highlight { background-color: #ffeb3b; transition: background-color 0.5s ease; }
+        .tooltip { display: none; position: absolute; background: #333; color: #fff; padding: 5px; border-radius: 3px; font-size: 0.9em; top: -40px; left: 50%; transform: translateX(-50%); }
+        .slider-container:hover .tooltip { display: block; }
+    </style>
 </head>
 <body>
-<h1>Evaluación Empleado vs Socio Dinámica con Dinero</h1>
-
-<div id="dinero-controls">
-  <label>
-    <input type="checkbox" id="auto-calculo" checked>
-    Activar cálculo automático de ingresos según tiempo y participación
-  </label>
-
-  <div id="dinero-settings">
-    <div class="input-group">
-      <label for="valor-hora">Valor hora (USD):</label>
-      <input type="number" id="valor-hora" value="20" min="0" step="1" />
+    <h1>Evaluación Empleado vs Socio - Sliders Correlativos</h1>
+    
+    <div class="section">
+        <h2>Parámetros Financieros (Sliders Dinámicos)</h2>
+        <p>Ajusta los sliders. Cuando el "Factor de participación" supere el 50%, el "Valor por hora" se ajustará automáticamente para equilibrar ingresos.</p>
+        
+        <div class="slider-container">
+            <label for="v_hora">Valor por hora (USD): <span id="v_hora_val">50</span></label>
+            <input type="range" id="v_hora" min="0" max="200" value="50" step="1">
+            <div class="tooltip">Ajustado por participación si > 50%</div>
+        </div>
+        
+        <div class="slider-container">
+            <label for="h_empleado">Horas anuales como Empleado: <span id="h_empleado_val">2000</span></label>
+            <input type="range" id="h_empleado" min="0" max="3000" value="2000" step="100">
+        </div>
+        
+        <div class="slider-container">
+            <label for="h_socio">Horas anuales como Socio: <span id="h_socio_val">400</span></label>
+            <input type="range" id="h_socio" min="0" max="3000" value="400" step="100">
+        </div>
+        
+        <div class="slider-container">
+            <label for="participacion">Factor de participación (%): <span id="participacion_val">20</span></label>
+            <input type="range" id="participacion" min="0" max="100" value="20" step="1">
+            <div class="tooltip">Ajusta "Valor por hora" si > 50%</div>
+        </div>
+        
+        <div class="slider-container">
+            <label for="profit_empresa">Beneficio anual esperado de la empresa (USD): <span id="profit_empresa_val">500000</span></label>
+            <input type="range" id="profit_empresa" min="0" max="1000000" value="500000" step="10000">
+        </div>
+        
+        <div>
+            <p class="output">Ingreso anual Empleado: <span id="ingreso_emp">100000 USD</span></p>
+            <p class="output">Ingreso anual Socio: <span id="ingreso_soc">100000 USD</span></p>
+            <p class="output">Eficiencia Empleado (USD/hora): <span id="eff_emp">50</span></p>
+            <p class="output">Eficiencia Socio (USD/hora): <span id="eff_soc">250</span></p>
+        </div>
     </div>
-    <div class="input-group">
-      <label for="factor-participacion">Factor participación (%):</label>
-      <input type="number" id="factor-participacion" value="30" min="0" max="100" step="1" />
-      <span style="margin-left:6px; font-weight: 600; color: #555;">%</span>
+    
+    <div class="section">
+        <h2>Pesos de Variables (Importancia Personal)</h2>
+        <p>Ajusta cuánto valoras cada factor (0-10).</p>
+        <div id="weights-container"></div>
     </div>
-  </div>
-</div>
+    
+    <div class="section">
+        <h2>Puntajes Totales</h2>
+        <div class="scores">
+            <div>
+                <h3>Empleado</h3>
+                <div class="score-bar"><div class="bar-fill" id="bar_emp"></div><div class="bar-text" id="score_emp">0%</div></div>
+            </div>
+            <div>
+                <h3>Socio</h3>
+                <div class="score-bar"><div class="bar-fill" id="bar_soc"></div><div class="bar-text" id="score_soc">0%</div></div>
+            </div>
+        </div>
+        <p class="conclusion" id="conclusion"></p>
+    </div>
 
-<div id="variables-container"></div>
+    <script>
+        const variables = [
+            {name: "Tiempo invertido", emp: 10, soc: 3, type: "bad"},
+            {name: "Control decisiones", emp: 2, soc: 7, type: "good"},
+            {name: "Riesgo financiero", emp: 0, soc: 8, type: "bad"},
+            {name: "Estabilidad económica", emp: 9, soc: 4, type: "good"},
+            {name: "Flexibilidad horaria", emp: 2, soc: 8, type: "good"},
+            {name: "Beneficios adicionales", emp: 8, soc: 3, type: "good"},
+            {name: "Crecimiento profesional", emp: 6, soc: 7, type: "good"},
+            {name: "Compromiso requerido", emp: 10, soc: 4, type: "bad"},
+            {name: "Poder de negociación", emp: 3, soc: 6, type: "good"},
+            {name: "Participación utilidades", emp: 0, soc: 8, type: "good"},
+            {name: "Riesgo laboral", emp: 7, soc: 3, type: "bad"},
+            {name: "Costo de oportunidad", emp: 8, soc: 2, type: "bad"}
+        ];
 
-<script>
-  const totalMax = 70;
-  const variables = {
-    tiempo_invertido: { descripcion: "Horas efectivas dedicadas semanalmente", valor: 3 },
-    ingresos_esperados: { descripcion: "Ingresos netos esperados por semana", valor: 7 },
-    control_decisiones: { descripcion: "Grado de influencia en decisiones", valor: 6 },
-    riesgo_financiero: { descripcion: "Nivel de exposición económica propia", valor: 8 },
-    estabilidad_economica: { descripcion: "Seguridad percibida de ingresos", valor: 4 },
-    flexibilidad_horaria: { descripcion: "Libertad para elegir horarios", valor: 7 },
-    beneficios_adicionales: { descripcion: "Acceso a prestaciones extras", valor: 3 },
-    crecimiento_profesional: { descripcion: "Oportunidades de desarrollo profesional", valor: 7 },
-    compromiso_requerido: { descripcion: "Nivel de esfuerzo y horas necesarias", valor: 4 },
-    eficiencia_economica: { descripcion: "Relación beneficio monetario y tiempo", valor: 6 },
-    poder_negociacion: { descripcion: "Capacidad de influir en salario y beneficios", valor: 6 },
-    participacion_utilidades: { descripcion: "Porcentaje de ganancias recibidas", valor: 8 },
-    riesgo_laboral: { descripcion: "Posibilidad de pérdida de empleo", valor: 3 },
-    costo_oportunidad: { descripcion: "Lo que se deja de ganar o hacer", valor: 2 }
-  };
+        // Generate weight sliders
+        const weightsContainer = document.getElementById('weights-container');
+        variables.forEach(v => {
+            const div = document.createElement('div');
+            div.className = 'slider-container';
+            div.innerHTML = `
+                <label for="weight_${v.name}">${v.name} (Importancia): <span id="weight_${v.name}_val">5</span></label>
+                <input type="range" id="weight_${v.name}" min="0" max="10" value="5" step="1">
+            `;
+            weightsContainer.appendChild(div);
+        });
 
-  const container = document.getElementById('variables-container');
-  const autoCalcCheckbox = document.getElementById('auto-calculo');
-  const valorHoraInput = document.getElementById('valor-hora');
-  const factorParticipacionInput = document.getElementById('factor-participacion');
+        const dynamicWeights = ['Ingresos esperados', 'Eficiencia económica'];
+        dynamicWeights.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'slider-container';
+            div.innerHTML = `
+                <label for="weight_${name}">${name} (Importancia): <span id="weight_${name}_val">5</span></label>
+                <input type="range" id="weight_${name}" min="0" max="10" value="5" step="1">
+            `;
+            weightsContainer.appendChild(div);
+        });
 
-  function sumValues() {
-    return Object.entries(variables)
-      .filter(([k]) => k !== 'ingresos_esperados')
-      .reduce((acc, [_, v]) => acc + v.valor, 0);
-  }
+        // Flag to prevent infinite loops
+        let isAdjusting = false;
 
-  function updateIngresosEsperados() {
-    if (autoCalcCheckbox.checked) {
-      const valorHora = Number(valorHoraInput.value) || 0;
-      const factor = (Number(factorParticipacionInput.value) || 0) / 100;
-      const tiempo = variables['tiempo_invertido'].valor;
-      let calculado = tiempo * valorHora * factor / 10;
-      calculado = Math.min(Math.max(calculado, 0), 10);
-      variables['ingresos_esperados'].valor = calculado;
-    }
-  }
+        function updateAll(sourceSlider = null) {
+            if (isAdjusting) return; // Prevent recursive updates
+            isAdjusting = true;
 
-  function balanceSliders(changedKey, newValue) {
-    if (changedKey === 'ingresos_esperados' && autoCalcCheckbox.checked) {
-      updateIngresosEsperados();
-      updateSlidersUI();
-      return;
-    }
+            // Get inputs
+            const v_horaSlider = document.getElementById('v_hora');
+            let v_hora = parseFloat(v_horaSlider.value);
+            const h_empleado = parseFloat(document.getElementById('h_empleado').value);
+            const h_socio = parseFloat(document.getElementById('h_socio').value);
+            const participacion = parseFloat(document.getElementById('participacion').value);
+            const profit_empresa = parseFloat(document.getElementById('profit_empresa').value);
 
-    let currentSum = sumValues();
-    let diff = newValue - variables[changedKey].valor;
-    variables[changedKey].valor = newValue;
-    currentSum += diff;
+            // Correlative adjustment: if participación > 50, adjust v_hora to match socio income
+            if (sourceSlider === 'participacion' && participacion > 50) {
+                const target_income = (participacion / 100) * profit_empresa;
+                v_hora = target_income / h_empleado; // Adjust to match socio income
+                v_hora = Math.min(200, Math.max(0, v_hora)); // Clamp to slider range
+                v_horaSlider.value = v_hora;
+                v_horaSlider.parentElement.classList.add('highlight');
+                setTimeout(() => v_horaSlider.parentElement.classList.remove('highlight'), 1000);
+            }
 
-    if (currentSum <= totalMax) { 
-      updateIngresosEsperados();
-      updateSlidersUI();
-      return;
-    }
+            // Update displayed values
+            document.getElementById('v_hora_val').textContent = v_hora.toFixed(0);
+            document.getElementById('h_empleado_val').textContent = h_empleado;
+            document.getElementById('h_socio_val').textContent = h_socio;
+            document.getElementById('participacion_val').textContent = participacion;
+            document.getElementById('profit_empresa_val').textContent = profit_empresa;
 
-    let excess = currentSum - totalMax;
-    let otherKeys = Object.keys(variables).filter(k => k !== changedKey && k !== 'ingresos_esperados');
-    let otherSum = otherKeys.reduce((acc, k) => acc + variables[k].valor, 0);
+            // Calculate incomes
+            const ingreso_emp = h_empleado * v_hora;
+            const ingreso_soc = (participacion / 100) * profit_empresa;
+            document.getElementById('ingreso_emp').textContent = ingreso_emp.toFixed(0) + ' USD';
+            document.getElementById('ingreso_soc').textContent = ingreso_soc.toFixed(0) + ' USD';
 
-    otherKeys.forEach(k => {
-      let reduction = (variables[k].valor / otherSum) * excess;
-      variables[k].valor = Math.max(0, variables[k].valor - reduction);
-    });
+            // Calculate efficiency
+            const eff_emp = h_empleado > 0 ? ingreso_emp / h_empleado : 0;
+            const eff_soc = h_socio > 0 ? ingreso_soc / h_socio : 0;
+            document.getElementById('eff_emp').textContent = eff_emp.toFixed(2);
+            document.getElementById('eff_soc').textContent = eff_soc.toFixed(2);
 
-    updateIngresosEsperados();
-    updateSlidersUI();
-  }
+            // Compute scores for dynamic vars
+            const max_income = 200000;
+            const ingreso_emp_score = Math.min(10, (ingreso_emp / max_income) * 10);
+            const ingreso_soc_score = Math.min(10, (ingreso_soc / max_income) * 10);
 
-  function updateSlidersUI() {
-    for (const [key, data] of Object.entries(variables)) {
-      const slider = document.getElementById(key);
-      const valorSpan = document.querySelector(`#${key} + .valor`);
-      if (slider && valorSpan) {
-        slider.value = Math.round(data.valor * 100) / 100;
-        valorSpan.textContent = (key === 'ingresos_esperados' && autoCalcCheckbox.checked)
-          ? data.valor.toFixed(2)
-          : Math.round(data.valor);
-        slider.disabled = (key === 'ingresos_esperados') && autoCalcCheckbox.checked;
-      }
-    }
-  }
+            const max_eff = 200;
+            const eff_emp_score = Math.min(10, (eff_emp / max_eff) * 10);
+            const eff_soc_score = Math.min(10, (eff_soc / max_eff) * 10);
 
-  function createSlider(key, data) {
-    const div = document.createElement('div');
-    div.className = 'variable';
+            // Calculate total scores
+            let total_emp = 0;
+            let total_soc = 0;
+            let total_weight = 0;
 
-    const label = document.createElement('label');
-    label.htmlFor = key;
-    label.textContent = data.descripcion;
+            variables.forEach(v => {
+                const w = parseInt(document.getElementById(`weight_${v.name}`).value);
+                const norm_emp = v.type === 'good' ? v.emp : 10 - v.emp;
+                const norm_soc = v.type === 'good' ? v.soc : 10 - v.soc;
+                total_emp += w * norm_emp;
+                total_soc += w * norm_soc;
+                total_weight += w;
+            });
 
-    const valorSpan = document.createElement('span');
-    valorSpan.className = 'valor';
-    valorSpan.textContent = data.valor;
+            const w_ing = parseInt(document.getElementById('weight_Ingresos esperados').value);
+            total_emp += w_ing * ingreso_emp_score;
+            total_soc += w_ing * ingreso_soc_score;
+            total_weight += w_ing;
 
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.min = 0;
-    slider.max = 10;
-    slider.step = 0.01;
-    slider.value = data.valor;
-    slider.id = key;
+            const w_eff = parseInt(document.getElementById('weight_Eficiencia económica').value);
+            total_emp += w_eff * eff_emp_score;
+            total_soc += w_eff * eff_soc_score;
+            total_weight += w_eff;
 
-    slider.oninput = function () {
-      balanceSliders(key, Number(this.value));
-    };
+            const score_emp_pct = total_weight > 0 ? (total_emp / (total_weight * 10)) * 100 : 0;
+            const score_soc_pct = total_weight > 0 ? (total_soc / (total_weight * 10)) * 100 : 0;
 
-    div.appendChild(label);
-    div.appendChild(valorSpan);
-    div.appendChild(slider);
+            // Update bars and texts
+            document.getElementById('score_emp').textContent = score_emp_pct.toFixed(1) + '%';
+            document.getElementById('score_soc').textContent = score_soc_pct.toFixed(1) + '%';
+            document.getElementById('bar_emp').style.width = score_emp_pct + '%';
+            document.getElementById('bar_soc').style.width = score_soc_pct + '%';
 
-    container.appendChild(div);
-  }
+            // Conclusion
+            let conclusion = '';
+            if (score_emp_pct > score_soc_pct) {
+                conclusion = 'Basado en tus preferencias, ser Empleado parece mejor.';
+            } else if (score_soc_pct > score_emp_pct) {
+                conclusion = 'Basado en tus preferencias, ser Socio parece mejor.';
+            } else {
+                conclusion = 'Ambas opciones parecen equivalentes.';
+            }
+            document.getElementById('conclusion').textContent = conclusion;
 
-  valorHoraInput.addEventListener('input', () => {
-    if (autoCalcCheckbox.checked) {
-      updateIngresosEsperados();
-      updateSlidersUI();
-    }
-  });
-  factorParticipacionInput.addEventListener('input', () => {
-    if (autoCalcCheckbox.checked) {
-      updateIngresosEsperados();
-      updateSlidersUI();
-    }
-  });
-  autoCalcCheckbox.addEventListener('change', () => {
-    updateIngresosEsperados();
-    updateSlidersUI();
-  });
+            isAdjusting = false;
+        }
 
-  for (const [key, data] of Object.entries(variables)) {
-    createSlider(key, data);
-  }
-  updateIngresosEsperados();
-  updateSlidersUI();
-</script>
+        // Add event listeners
+        const sliders = document.querySelectorAll('input[type="range"]');
+        sliders.forEach(slider => {
+            slider.addEventListener('input', () => {
+                updateAll(slider.id);
+                if (slider.id.startsWith('weight_')) {
+                    document.getElementById(slider.id + '_val').textContent = slider.value;
+                }
+            });
+        });
+
+        // Initial update
+        updateAll();
+    </script>
 </body>
 </html>
